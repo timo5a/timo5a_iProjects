@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Страница оплаты</title>
+</head>
+<body>
+    <% layout('layout') -%>
+    <h1>Оплата</h1>
+    <p>Перенаправляем вас на страницу оплаты...</p>
+    <script type="text/javascript">
+        window.location.href = "<%= paymentUrl %>";
+    </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= pageTitle || "Сохранённые товары" %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1110px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .wishlist-tile {
+            border: 1px solid #ddd;
+            border-right: none;
+            border-bottom: none;
+            padding: 10px;
+            text-align: center;
+            background-color: #fff;
+        }
+        .wishlist-tile:nth-child(3n) {
+            border-right: 1px solid #ddd;
+        }
+        .wishlist-tile:nth-last-child(-n+3) {
+            border-bottom: 1px solid #ddd;
+        }
+        .wishlist-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .wishlist-name {
+            font-size: 1em;
+            margin: 5px 0;
+        }
+        .wishlist-price {
+            font-size: 1.2em;
+            color: #28a745;
+        }
+        @media (max-width: 1110px) {
+            .wishlist-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+            .wishlist-tile {
+                border-right: none;
+            }
+            .wishlist-tile:nth-child(2n) {
+                border-right: 1px solid #ddd;
+            }
+            .wishlist-tile:nth-last-child(-n+2) {
+                border-bottom: 1px solid #ddd;
+            }
+            .wishlist-tile:nth-last-child(-n+3) {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><%= pageTitle || "Сохранённые товары" %></h1>
+        <% if (wishlistItems && wishlistItems.length > 0) { %>
+            <div class="wishlist-grid">
+                <% wishlistItems.forEach(item => { %>
+                    <div class="wishlist-tile" id="wishlist-item-<%= item.id %>">
+                        <a href="/product/<%= item.id %>">
+                            <img src="<%= item.image_url || '/default-image.jpg' %>" alt="<%= item.name %>" class="wishlist-image">
+                            <div class="wishlist-name"><%= item.name %></div>
+                        </a>
+                        <div class="wishlist-price"><%= item.price.toFixed(2) %> руб.</div>
+                        <button 
+                            class="btn btn-danger btn-sm" 
+                            onclick="removeFromWishlist(event, <%= item.id %>)">
+                            Удалить
+                        </button>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p>Ваш список сохранённых товаров пуст.</p>
+        <% } %>
+        <a href="/products" class="btn btn-secondary mt-3">Вернуться к каталогу</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        async function removeFromWishlist(event, productId) {
+            event.preventDefault();
+            try {
+                const response = await fetch(`/remove-from-wishlist/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById(`wishlist-item-${productId}`).remove();
+                    if (!document.querySelector('.wishlist-tile')) {
+                        document.querySelector('.wishlist-grid').innerHTML = '<p>Ваш список сохранённых товаров пуст.</p>';
+                    }
+                }
+            } catch (err) {
+                console.error('Ошибка при удалении из списка желаний:', err);
+            }
+        }
+    </script>
+</body>
+</html>

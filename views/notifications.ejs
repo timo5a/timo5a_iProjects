@@ -1,0 +1,15 @@
+<div class="container">
+    <h1><%= pageTitle || "Мои уведомления о поступлении" %></h1>
+    <% if (notifications && notifications.length > 0) { %>
+        <ul>
+            <% notifications.forEach(notification => { %>
+                <li>
+                    Товар: <%= notification.name %> 
+                    - <%= notification.notified ? 'Поступил на склад' : 'Ожидается' %>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <p>Уведомлений нет.</p>
+    <% } %>
+</div>

@@ -1,0 +1,112 @@
+<div class="container">
+    <div class="product-details">
+        <img src="<%= product.image_url || '/default-image.jpg' %>" alt="<%= product.name %>" class="product-image">
+        <div class="product-info">
+            <h1><%= product.name %></h1>
+            <p>
+                <strong>Цена:</strong> <%= product.price.toFixed(2) %> руб.
+                <span class="rating-stars">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                        <% if (i <= Math.round(product.average_rating)) { %>
+                            ★
+                        <% } else { %>
+                            ☆
+                        <% } %>
+                    <% } %>
+                    (<%= product.review_count %> отзывов)
+                </span>
+            </p>
+            <p class="product-stock">
+                <% if (product.stock > 0) { %>
+                    В наличии: <%= product.stock %> шт.
+                <% } else { %>
+                    Нет в наличии
+                <% } %>
+            </p>
+            <p><strong>Категория:</strong> <%= product.category_name || 'Без категории' %></p>
+            <p><strong>Описание:</strong> <%= product.description || 'Описание отсутствует' %></p>
+            <div class="d-flex align-items-center gap-2">
+                <% if (product.stock > 0) { %>
+                    <form id="add-to-cart-form-<%= product.id %>" style="display: inline;" onsubmit="addToCart(event, <%= product.id %>)">
+                        <button type="submit" class="btn btn-success btn-sm">Добавить в корзину</button>
+                    </form>
+                <% } else { %>
+                    <button class="btn btn-warning btn-sm" onclick="notifyMe(<%= product.id %>)">Уведомить о поступлении</button>
+                <% } %>
+                <% if (user) { %>
+                    <% const isInWishlist = wishlistIds && wishlistIds.includes(product.id); %>
+                    <form action="<%= isInWishlist ? '/remove-from-wishlist' : '/add-to-wishlist' %>/<%= product.id %>" method="POST" style="display: inline;">
+                        <button type="submit" 
+                                class="btn btn-sm <%= isInWishlist ? 'btn-primary' : 'btn-outline-primary' %>" 
+                                title="<%= isInWishlist ? 'Удалить из сохранённых товаров' : 'Добавить в сохранённые товары' %>"
+                                style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            ♥
+                        </button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <div class="related-products">
+            <h3>С этим товаром покупают</h3>
+            <div class="related-grid">
+                <% relatedProducts.forEach(related => { %>
+                    <div class="related-tile">
+                        <a href="/product/<%= related.id %>">
+                            <img src="<%= related.image_url || '/default-image.jpg' %>" alt="<%= related.name %>" class="related-image">
+                            <p class="related-name"><%= related.name %></p>
+                            <p class="related-price"><%= Number(related.price).toFixed(2) %> руб.</p>
+                        </a>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (reviews && reviews.length > 0) { %>
+        <div class="reviews-section">
+            <h3>Отзывы</h3>
+            <% reviews.forEach(review => { %>
+                <div class="review">
+                    <div class="review-author">
+                        <%= review.username %>
+                        <span class="rating-stars">
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <% if (i <= review.rating) { %>
+                                    ★
+                                <% } else { %>
+                                    ☆
+                                <% } %>
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="review-date"><%= review.created_at.toLocaleDateString() %></div>
+                    <p><%= review.comment || 'Без комментария' %></p>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    async function addToCart(event, productId) {
+        event.preventDefault(); // Предотвращаем стандартную отправку формы
+        try {
+            const response = await fetch(`/add-to-cart/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Товар добавлен в корзину!');
+            } else {
+                alert(result.message || 'Ошибка при добавлении в корзину');
+            }
+        } catch (err) {
+            console.error('Ошибка:', err);
+            alert('Произошла ошибка при добавлении товара в корзину.');
+        }
+    }
+</script>

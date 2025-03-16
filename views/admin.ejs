@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= pageTitle || "Админ-панель" %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            font-family: 'Arial', sans-serif;
+        }
+        p {
+            color: #ddd;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        .btn-primary {
+            background: #00b4ff;
+            border: none;
+            box-shadow: 0 0 5px #00b4ff;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: #0094d9;
+            box-shadow: 0 0 15px #00b4ff;
+        }
+        .btn-secondary {
+            background: #555;
+            border: none;
+            box-shadow: 0 0 5px #555;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #444;
+            box-shadow: 0 0 15px #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Админ-панель</h1>
+        <p>Привет, <%= user.username %>!</p>
+        <a href="/admin/add-product" class="btn btn-primary mb-2">Добавить товары</a>
+        <a href="/admin/products" class="btn btn-primary mb-2">Управление ассортиментом</a>
+        <a href="/admin/users" class="btn btn-primary mb-2">Список пользователей</a>
+        <a href="/products" class="btn btn-secondary mb-2">К каталогу</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= pageTitle || "Добавить новый товар" %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            font-family: 'Arial', sans-serif;
+        }
+        .table {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .table th {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+        }
+        .form-control::placeholder {
+            color: #ccc;
+        }
+        .btn-success {
+            background: #00b4ff;
+            border: none;
+            box-shadow: 0 0 5px #00b4ff;
+            transition: all 0.3s;
+        }
+        .btn-success:hover {
+            background: #0094d9;
+            box-shadow: 0 0 15px #00b4ff;
+        }
+        .btn-secondary {
+            background: #555;
+            border: none;
+            box-shadow: 0 0 5px #555;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #444;
+            box-shadow: 0 0 15px #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Добавить новые товары</h1>
+        <form action="/add-product" method="POST">
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Цена</th>
+                        <th>Описание</th>
+                        <th>Категория</th>
+                        <th>URL изображения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i = 0; i < 10; i++) { %>
+                        <tr>
+                            <td><input type="text" name="products[<%= i %>][name]" class="form-control" placeholder="Название"></td>
+                            <td><input type="number" step="0.01" name="products[<%= i %>][price]" class="form-control" placeholder="Цена"></td>
+                            <td><textarea name="products[<%= i %>][description]" class="form-control" placeholder="Описание"></textarea></td>
+                            <td>
+                                <select name="products[<%= i %>][category_id]" class="form-control">
+                                    <option value="">Без категории</option>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat.id %>"><%= cat.name %></option>
+                                    <% }) %>
+                                </select>
+                            </td>
+                            <td><input type="text" name="products[<%= i %>][image_url]" class="form-control" placeholder="URL изображения"></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-success">Добавить товары</button>
+            <a href="/admin" class="btn btn-secondary">Назад</a>
+        </form>
+    </div>
+</body>
+</html>

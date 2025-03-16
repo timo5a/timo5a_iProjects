@@ -1,0 +1,108 @@
+<div class="container">
+    <h1><%= pageTitle || "Корзина" %></h1>
+    <% if (cart && cart.length > 0) { %>
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Изображение</th>
+                    <th>Название</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Доступно</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% cart.forEach(item => { %>
+                    <tr id="cart-item-<%= item.id %>">
+                        <td><img src="<%= item.image_url || '/default-image.jpg' %>" alt="<%= item.name %>" class="cart-image"></td>
+                        <td><%= item.name %></td>
+                        <td><%= item.price.toFixed(2) %> руб.</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="updateCart(<%= item.id %>, -1)">−</button>
+                            <span class="quantity"><%= item.quantity %></span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="updateCart(<%= item.id %>, 1)">+</button>
+                        </td>
+                        <td><%= item.stock || 0 %></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="removeFromCart(<%= item.id %>)">Удалить</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <div class="total-price">
+            Итого: <span id="total-price"><%= cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2) %> руб.</span>
+        </div>
+    <% } else { %>
+        <p>Ваша корзина пуста.</p>
+    <% } %>
+    <a href="/products" class="btn btn-secondary mt-3">Вернуться к каталогу</a>
+</div>
+
+<script>
+    async function updateCart(productId, change) {
+        try {
+            const row = document.getElementById(`cart-item-${productId}`);
+            const currentQuantity = parseInt(row.querySelector('.quantity').textContent);
+            const newQuantity = currentQuantity + change;
+
+            if (newQuantity < 1) {
+                removeFromCart(productId);
+                return;
+            }
+
+            console.log(`Обновляем: productId=${productId}, newQuantity=${newQuantity}`);
+            const response = await fetch(`/cart/update/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `quantity=${newQuantity}`
+            });
+            const result = await response.json();
+            console.log('Ответ сервера:', result);
+            if (result.success) {
+                row.querySelector('.quantity').textContent = newQuantity;
+                updateTotalPrice();
+            } else {
+                alert(result.message || 'Ошибка при обновлении количества');
+            }
+        } catch (err) {
+            console.error('Ошибка:', err);
+            alert('Произошла ошибка при обновлении корзины.');
+        }
+    }
+
+    async function removeFromCart(productId) {
+        try {
+            const response = await fetch(`/remove-from-cart/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                const row = document.getElementById(`cart-item-${productId}`);
+                row.remove();
+                if (!document.querySelector('.cart-table tbody tr')) {
+                    document.querySelector('.cart-table').outerHTML = '<p>Ваша корзина пуста.</p>';
+                }
+                updateTotalPrice();
+            } else {
+                alert(result.message || 'Ошибка при удалении товара');
+            }
+        } catch (err) {
+            console.error('Ошибка:', err);
+            alert('Произошла ошибка при удалении товара.');
+        }
+    }
+
+    function updateTotalPrice() {
+        const rows = document.querySelectorAll('.cart-table tbody tr');
+        let total = 0;
+        rows.forEach(row => {
+            const price = parseFloat(row.querySelector('td:nth-child(3)').textContent);
+            const quantity = parseInt(row.querySelector('.quantity').textContent);
+            total += price * quantity;
+        });
+        document.getElementById('total-price').textContent = total.toFixed(2) + ' руб.';
+    }
+</script>
